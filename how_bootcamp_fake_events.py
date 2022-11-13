@@ -2,11 +2,13 @@ import json
 from fake_web_events import Simulation 
 from aws import client
 
+# You need to conect to your account in aws 
+# To use s3 and kinesis firehose  
 
 def put_record(event: dict):
     data = json.dumps(event) + "\n"
     response = client.put_record(
-        DeliveryStreamName = 'egd-jessica', #nome da instancia no kinesis
+        DeliveryStreamName = 'egd-jessica', #instance name kinesis
         Record={"Data": data}
     )
     print(event)
