@@ -2,19 +2,29 @@
 #imports 
 import requests
 import json
+# %%
+
+def error_check(func):
+    def inner_func(*args, **kargs):
+        try:
+            func(*args, **kargs)
+        except: 
+            print(f"{func.__name__} falhou")
+    return inner_func
+
+@error_check
+def cotacao(valor, moeda):
+    url = f'https://economia.awesomeapi.com.br/last/{moeda}'
+    ret = requests.get(url)
+    dolar = json.loads(ret.text)[moeda.replace('-','')]
+    print(f"{valor} {moeda[:3]} hoje custam {float(dolar['bid']) * valor} {moeda[-3:]}")
+
 
 #%%
-url = 'https://economia.awesomeapi.com.br/last/USD-BRL'
-ret = requests.get(url)
+cotacao(20, 'USD-BRL')
+cotacao(20, 'BTC-BRL')
+cotacao(20, 'EUR-BRL')
+cotacao(20, 'RPL-BRL')
+cotacao(20, 'JPY-BRL')
+# %%
 
-#%%
-if ret: 
-    print(ret)
-else:
-    print('Failed')
-# %%
-dolar = json.loads(ret.text)['USDBRL']
-
-# %%
-print ( f" 20 dolares hoje custam {float(dolar['bid']) * 20} reais")
-# %%
