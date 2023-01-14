@@ -32,3 +32,29 @@ from "Billboard" b
 where b.artist in ('Adele','Selena Gomez')
 group by artist, song
 order by "#song" desc
+
+
+ -- #CTE 
+ with artists as (
+ select 
+	 b.artist
+     , count(*) as qtd_artist
+  from "Billboard" b
+  group by b.artist
+  order by b.artist
+ )
+ , songs as (
+ select b.song
+     , count(*) as qtd_song
+  from "Billboard" b
+  group by b.song
+  order by b.song
+ )
+ select distinct bbd.artist
+      , art.qtd_artist 
+      , bbd.song 
+      , sng.qtd_song 
+    from "Billboard" bbd
+    left join artists art on bbd.artist = art.artist  
+ 	left join songs sng on bbd.song = sng.song 
+    order by bbd.artist, bbd.song
