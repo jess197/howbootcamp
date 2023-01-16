@@ -58,3 +58,37 @@ order by "#song" desc
     left join artists art on bbd.artist = art.artist  
  	left join songs sng on bbd.song = sng.song 
     order by bbd.artist, bbd.song
+
+
+WITH cte_billboard AS (
+	SELECT DISTINCT 
+			 b.artist 
+		   , b.song
+		   , row_number() over(order by artist,song) as row_number
+           , row_number() over(partition by artist order by artist, song) as row_number_artist
+	   FROM public."Billboard" b 
+	order by b.artist 
+	  , b.song 
+)
+select * 
+  from cte_billboard
+where "row_number_artist" = 1; 
+    
+
+WITH cte_billboard AS (
+	SELECT DISTINCT 
+			 b.artist 
+		   , b.song
+	   FROM public."Billboard" b 
+	order by b.artist 
+	  , b.song 
+)
+select * 
+   -- , row_number() over(order by artist,song) as row_number
+   -- , row_number() over(partition by artist order by artist, song) as row_number_artist
+    , rank() over(partition by artist order by artist,song) as "rank"
+   -- , lag(song, 1) over(partition by artist order by artist,song) as "lag_song"
+   -- , lead(song, 1) over(partition by artist order by artist,song) as "lead_song"
+    , first_value(song) over(partition by artist order by artist,song) as "first_song"
+    , last_value(song) over(partition by artist order by artist,song range between unbounded preceding and unbounded following) as "last_song"
+  from cte_billboard; 
