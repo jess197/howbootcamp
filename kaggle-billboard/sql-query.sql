@@ -92,3 +92,65 @@ select *
     , first_value(song) over(partition by artist order by artist,song) as "first_song"
     , last_value(song) over(partition by artist order by artist,song range between unbounded preceding and unbounded following) as "last_song"
   from cte_billboard; 
+
+-- VIEW ARTIST with deduplication
+create view vw_artist as (
+with cte_dedup_artist as ( 
+ select b."date"
+      , b."rank"
+      , b.artist
+      , row_number() over(partition by artist order by artist, "date") as dedup
+  from tb_artist b 
+  order by b.artist, b."date"
+  ) 
+  select b."date"
+       , b."rank"
+       , b.artist
+    from cte_dedup_artist as b 
+    where b.dedup = 1
+);
+
+-- CREATE TABLE tb_artist 
+
+create table tb_artist as (
+select b."date"
+      , b."rank"
+      , b.artist
+      , b.song
+  from public."Billboard" b
+  where b.artist = 'AC/DC'
+  order by b.artist, b.song, b."date"
+
+);
+
+
+insert into tb_artist (
+select b."date"
+      , b."rank"
+      , b.artist
+      , b.song
+  from public."Billboard" b
+  where b.artist like 'Adele%'
+  order by b.artist, b.song ,b."date"
+);
+
+
+
+-- VIEW SONG    
+create view vw_song as (
+with cte_dedup_artist as ( 
+ select b."date"
+      , b."rank"
+      , b.artist
+      , b.song
+      , row_number() over(partition by artist,song order by artist, song,"date") as dedup
+  from tb_artist b 
+  order by b.artist, b.song, b."date"
+  ) 
+  select b."date"
+       , b."rank"
+       , b.artist
+       , b.song
+    from cte_dedup_artist as b 
+    where b.dedup = 1
+);
